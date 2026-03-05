@@ -177,7 +177,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const login = (username: string, password: string): boolean => {
-    const user = users.find(u => u.username === username);
+    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
     if (!user) return false;
     const cred = credentials.find(c => c.userId === user.id && c.password === password);
     if (!cred) return false;
