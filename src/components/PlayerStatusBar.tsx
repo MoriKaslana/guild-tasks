@@ -1,18 +1,22 @@
 import { useGame } from "@/context/GameContext";
 import { Progress } from "@/components/ui/progress";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Shield, Flame, Zap, Clock, Skull, AlertTriangle, Wrench } from "lucide-react";
+import { Shield, Flame, Zap, Clock, Skull, AlertTriangle, Wrench, Target, Swords, Moon, Sparkles } from "lucide-react";
 
 const BUFF_INFO: Record<string, { icon: React.ReactNode; color: string; desc: string }> = {
   "Adventurer's Haste": { icon: <Zap className="h-3.5 w-3.5" />, color: "text-gold bg-gold/15 border-gold/30", desc: "Submitted early — bonus speed recognized!" },
   "Scholar's Focus": { icon: <Shield className="h-3.5 w-3.5" />, color: "text-emerald-glow bg-emerald/15 border-emerald/30", desc: "Completed a hard or legendary quest." },
   "Weekend Warrior": { icon: <Flame className="h-3.5 w-3.5" />, color: "text-royal-purple bg-royal-purple/15 border-royal-purple/30", desc: "Submitted on a weekend — true dedication!" },
+  "Night Owl": { icon: <Moon className="h-3.5 w-3.5" />, color: "text-royal-purple bg-royal-purple/15 border-royal-purple/30", desc: "Submitted between midnight and 5 AM." },
+  "Clutch Player": { icon: <Target className="h-3.5 w-3.5" />, color: "text-gold bg-gold/15 border-gold/30", desc: "Submitted just before the deadline!" },
+  "First Strike": { icon: <Swords className="h-3.5 w-3.5" />, color: "text-emerald-glow bg-emerald/15 border-emerald/30", desc: "Completed within 1 hour of accepting!" },
 };
 
 const DEBUFF_INFO: Record<string, { icon: React.ReactNode; color: string; desc: string }> = {
   "Cursed Procrastination": { icon: <Clock className="h-3.5 w-3.5" />, color: "text-crimson bg-crimson/15 border-crimson/30", desc: "Submitted after the deadline." },
   "Slacker's Fatigue": { icon: <Skull className="h-3.5 w-3.5" />, color: "text-crimson bg-crimson/15 border-crimson/30", desc: "Too many active quests (>5)." },
   "Rusty Equipment": { icon: <Wrench className="h-3.5 w-3.5" />, color: "text-crimson bg-crimson/15 border-crimson/30", desc: "No quest completed in 7 days." },
+  "Dragon's Shame": { icon: <Sparkles className="h-3.5 w-3.5" />, color: "text-crimson bg-crimson/15 border-crimson/30", desc: "Massively overdue submission." },
 };
 
 const PlayerStatusBar = () => {

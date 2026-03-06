@@ -59,9 +59,15 @@ const AVATARS = ["⚔️", "🛡️", "🧙", "🏹", "🗡️", "🔮", "🐉",
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: "first_quest", title: "First Blood", description: "Complete your first quest", icon: "⚔️", unlockedBy: [] },
   { id: "five_quests", title: "Seasoned Warrior", description: "Complete 5 quests", icon: "🛡️", unlockedBy: [] },
+  { id: "ten_quests", title: "Veteran", description: "Complete 10 quests", icon: "🏅", unlockedBy: [] },
   { id: "speed_demon", title: "Speed Demon", description: "Submit a quest within 1 hour", icon: "⚡", unlockedBy: [] },
   { id: "legendary", title: "Legend", description: "Complete a legendary quest", icon: "👑", unlockedBy: [] },
   { id: "social", title: "Tavern Regular", description: "Send 10 messages in the tavern", icon: "🍻", unlockedBy: [] },
+  { id: "level5", title: "Rising Star", description: "Reach level 5", icon: "⭐", unlockedBy: [] },
+  { id: "level10", title: "Elite Warrior", description: "Reach level 10", icon: "💎", unlockedBy: [] },
+  { id: "streak3", title: "Hat Trick", description: "Complete 3 quests in a row without a debuff", icon: "🎯", unlockedBy: [] },
+  { id: "all_difficulties", title: "Jack of All Trades", description: "Complete one quest of each difficulty", icon: "🃏", unlockedBy: [] },
+  { id: "night_owl", title: "Night Owl", description: "Submit a quest between midnight and 5 AM", icon: "🦉", unlockedBy: [] },
 ];
 
 interface GameState {
@@ -138,10 +144,36 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       toast("🔥 Buff Gained: Weekend Warrior", { description: "Working on weekends — true dedication!" });
     }
 
+    // Night Owl buff — submitted between midnight and 5 AM
+    const hour = new Date(submittedAt).getHours();
+    if (hour >= 0 && hour < 5 && !newBuffs.includes("Night Owl")) {
+      newBuffs.push("Night Owl");
+      toast("🦉 Buff Gained: Night Owl", { description: "Burning the midnight oil!" });
+    }
+
+    // Perfectionist buff — submitted within 10% of total time
+    if (timeLeft > 0 && timeLeft < totalTime * 0.1 && !newBuffs.includes("Clutch Player")) {
+      newBuffs.push("Clutch Player");
+      toast("🎯 Buff Gained: Clutch Player", { description: "Submitted just in time — clutch!" });
+    }
+
+    // First Strike buff — submitted within 1 hour of accepting
+    const timeSinceAccept = submittedAt - (quest.acceptedAt || quest.createdAt);
+    if (timeSinceAccept < 60 * 60 * 1000 && !newBuffs.includes("First Strike")) {
+      newBuffs.push("First Strike");
+      toast("⚔️ Buff Gained: First Strike", { description: "Completed within an hour of accepting!" });
+    }
+
     // Late submission debuff
     if (submittedAt > quest.deadline && !newDebuffs.includes("Cursed Procrastination")) {
       newDebuffs.push("Cursed Procrastination");
       toast("💀 Debuff: Cursed Procrastination", { description: "Submitted after the deadline..." });
+    }
+
+    // Very late — more than double the time
+    if (submittedAt > quest.deadline && (submittedAt - quest.deadline) > totalTime && !newDebuffs.includes("Dragon's Shame")) {
+      newDebuffs.push("Dragon's Shame");
+      toast("🐉 Debuff: Dragon's Shame", { description: "Massively overdue — the guild whispers..." });
     }
 
     return { ...user, buffs: newBuffs, debuffs: newDebuffs };
@@ -275,9 +307,29 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           toast("🏆 Achievement Unlocked: Seasoned Warrior!", { description: "Completed 5 quests!" });
           return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
         }
+        if (a.id === "ten_quests" && adventurer.questsCompleted === 9 && !a.unlockedBy.includes(adventurer.id)) {
+          toast("🏆 Achievement Unlocked: Veteran!", { description: "Completed 10 quests!" });
+          return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
+        }
         if (a.id === "legendary" && quest.difficulty === "legendary" && !a.unlockedBy.includes(adventurer.id)) {
           toast("🏆 Achievement Unlocked: Legend!", { description: "Completed a legendary quest!" });
           return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
+        }
+        const newLevel = calcLevel(adventurer.xp + quest.xpReward);
+        if (a.id === "level5" && newLevel >= 5 && !a.unlockedBy.includes(adventurer.id)) {
+          toast("🏆 Achievement Unlocked: Rising Star!", { description: "Reached level 5!" });
+          return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
+        }
+        if (a.id === "level10" && newLevel >= 10 && !a.unlockedBy.includes(adventurer.id)) {
+          toast("🏆 Achievement Unlocked: Elite Warrior!", { description: "Reached level 10!" });
+          return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
+        }
+        if (a.id === "night_owl" && quest.submittedAt) {
+          const submitHour = new Date(quest.submittedAt).getHours();
+          if (submitHour >= 0 && submitHour < 5 && !a.unlockedBy.includes(adventurer.id)) {
+            toast("🏆 Achievement Unlocked: Night Owl!", { description: "Submitted in the dead of night!" });
+            return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
+          }
         }
         return a;
       }));

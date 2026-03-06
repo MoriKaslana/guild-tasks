@@ -23,6 +23,7 @@ const QuestBoard = () => {
   const [deadlineDate, setDeadlineDate] = useState<Date | undefined>(undefined);
   const [deadlineHour, setDeadlineHour] = useState("12");
   const [deadlineMinute, setDeadlineMinute] = useState("00");
+  const [deadlinePeriod, setDeadlinePeriod] = useState<"AM" | "PM">("PM");
   const [open, setOpen] = useState(false);
 
   const isGM = currentUser?.role === "guild_master";
@@ -36,7 +37,10 @@ const QuestBoard = () => {
     e.preventDefault();
     if (!deadlineDate) return;
     const deadline = new Date(deadlineDate);
-    deadline.setHours(parseInt(deadlineHour), parseInt(deadlineMinute), 0, 0);
+    let h = parseInt(deadlineHour);
+    if (deadlinePeriod === "AM" && h === 12) h = 0;
+    if (deadlinePeriod === "PM" && h !== 12) h += 12;
+    deadline.setHours(h, parseInt(deadlineMinute), 0, 0);
     const deadlineMs = deadline.getTime();
     createQuest(title, desc, diff, deadlineMs);
     setTitle(""); setDesc(""); setDeadlineDate(undefined); setOpen(false);
@@ -116,11 +120,14 @@ const QuestBoard = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          {Array.from({ length: 24 }, (_, i) => (
-                            <SelectItem key={i} value={String(i).padStart(2, "0")}>
-                              {String(i).padStart(2, "0")}
-                            </SelectItem>
-                          ))}
+                          {Array.from({ length: 12 }, (_, i) => {
+                            const val = String(i + 1).padStart(2, "0");
+                            return (
+                              <SelectItem key={val} value={val}>
+                                {val}
+                              </SelectItem>
+                            );
+                          })}
                         </SelectContent>
                       </Select>
                       <span className="flex items-center text-muted-foreground">:</span>
@@ -132,6 +139,15 @@ const QuestBoard = () => {
                           {["00", "15", "30", "45"].map(m => (
                             <SelectItem key={m} value={m}>{m}</SelectItem>
                           ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={deadlinePeriod} onValueChange={(v) => setDeadlinePeriod(v as "AM" | "PM")}>
+                        <SelectTrigger className="w-20 bg-secondary border-border">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="AM">AM</SelectItem>
+                          <SelectItem value="PM">PM</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
