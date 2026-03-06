@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from "react";
+import { toast } from "sonner";
 
 export type Role = "guild_master" | "adventurer";
 export type QuestDifficulty = "easy" | "medium" | "hard" | "legendary";
@@ -121,22 +122,26 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const totalTime = quest.deadline - (quest.acceptedAt || quest.createdAt);
     if (timeLeft > totalTime * 0.5 && !newBuffs.includes("Adventurer's Haste")) {
       newBuffs.push("Adventurer's Haste");
+      toast("⚡ Buff Gained: Adventurer's Haste", { description: "Submitted early — impressive speed!" });
     }
 
     // Hard task buff
     if ((quest.difficulty === "hard" || quest.difficulty === "legendary") && !newBuffs.includes("Scholar's Focus")) {
       newBuffs.push("Scholar's Focus");
+      toast("🛡️ Buff Gained: Scholar's Focus", { description: "Conquered a challenging quest!" });
     }
 
     // Weekend warrior
     const day = new Date(submittedAt).getDay();
     if ((day === 0 || day === 6) && !newBuffs.includes("Weekend Warrior")) {
       newBuffs.push("Weekend Warrior");
+      toast("🔥 Buff Gained: Weekend Warrior", { description: "Working on weekends — true dedication!" });
     }
 
     // Late submission debuff
     if (submittedAt > quest.deadline && !newDebuffs.includes("Cursed Procrastination")) {
       newDebuffs.push("Cursed Procrastination");
+      toast("💀 Debuff: Cursed Procrastination", { description: "Submitted after the deadline..." });
     }
 
     return { ...user, buffs: newBuffs, debuffs: newDebuffs };
@@ -148,6 +153,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (activeQuests.length > 5 && !newDebuffs.includes("Slacker's Fatigue")) {
       newDebuffs.push("Slacker's Fatigue");
+      toast("💀 Debuff: Slacker's Fatigue", { description: "Too many active quests! Focus up." });
     }
 
     // Inactivity: no quest completed in 7 days
@@ -155,7 +161,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       .filter(q => q.assignedTo === user.id && q.status === "completed")
       .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))[0];
     if (lastCompleted && Date.now() - (lastCompleted.completedAt || 0) > 7 * 24 * 60 * 60 * 1000) {
-      if (!newDebuffs.includes("Rusty Equipment")) newDebuffs.push("Rusty Equipment");
+      if (!newDebuffs.includes("Rusty Equipment")) {
+        newDebuffs.push("Rusty Equipment");
+        toast("🔧 Debuff: Rusty Equipment", { description: "No quest completed in 7 days — get moving!" });
+      }
     }
 
     return { ...user, debuffs: newDebuffs };
@@ -259,12 +268,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (adventurer) {
       setAchievements(prev => prev.map(a => {
         if (a.id === "first_quest" && adventurer.questsCompleted === 0 && !a.unlockedBy.includes(adventurer.id)) {
+          toast("🏆 Achievement Unlocked: First Blood!", { description: "Completed your first quest!" });
           return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
         }
         if (a.id === "five_quests" && adventurer.questsCompleted === 4 && !a.unlockedBy.includes(adventurer.id)) {
+          toast("🏆 Achievement Unlocked: Seasoned Warrior!", { description: "Completed 5 quests!" });
           return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
         }
         if (a.id === "legendary" && quest.difficulty === "legendary" && !a.unlockedBy.includes(adventurer.id)) {
+          toast("🏆 Achievement Unlocked: Legend!", { description: "Completed a legendary quest!" });
           return { ...a, unlockedBy: [...a.unlockedBy, adventurer.id] };
         }
         return a;
@@ -287,7 +299,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (count >= 10) {
       setAchievements(prev => prev.map(a =>
         a.id === "social" && !a.unlockedBy.includes(currentUser.id)
-          ? { ...a, unlockedBy: [...a.unlockedBy, currentUser.id] }
+          ? (toast("🏆 Achievement Unlocked: Tavern Regular!", { description: "Sent 10 messages in the tavern!" }), { ...a, unlockedBy: [...a.unlockedBy, currentUser.id] })
           : a
       ));
     }
