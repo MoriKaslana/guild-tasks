@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { GameProvider, useGame } from "@/context/GameContext";
 import AppSidebar from "@/components/AppSidebar";
+import PlayerStatusBar from "@/components/PlayerStatusBar";
 import AuthScreen from "@/components/AuthScreen";
 import QuestBoard from "@/pages/QuestBoard";
 import ReviewBoard from "@/pages/ReviewBoard";
@@ -27,11 +28,14 @@ const AuthenticatedApp = () => {
       <div className="min-h-screen flex w-full">
         <AppSidebar />
         <div className="flex-1 flex flex-col">
-          <header className="h-12 flex items-center border-b border-border px-2">
-            <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
-            <span className="ml-3 font-heading text-sm text-muted-foreground">
-              {currentUser.role === "guild_master" ? "👑 Guild Master" : "⚔️ Adventurer"} — {currentUser.username}
-            </span>
+          <header className="h-12 flex items-center justify-between border-b border-border px-2">
+            <div className="flex items-center">
+              <SidebarTrigger className="text-muted-foreground hover:text-foreground" />
+              <span className="ml-3 font-heading text-sm text-muted-foreground">
+                {currentUser.role === "guild_master" ? "👑 Guild Master" : "⚔️ Adventurer"} — {currentUser.username}
+              </span>
+            </div>
+            <PlayerStatusBar />
           </header>
           <main className="flex-1 overflow-y-auto">
             <Routes>
