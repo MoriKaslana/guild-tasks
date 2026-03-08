@@ -38,10 +38,18 @@ const PlayerStatusBar = () => {
   const hasStagnantSoul = allDebuffs.includes("Stagnant Soul");
 
   const getTimeRemaining = (name: string, isDebuff: boolean) => {
-    const entries = isDebuff ? currentUser.activeDebuffs : currentUser.activeBuffs;
-    const entry = entries?.find((e: any) => e.name === name);
-    if (!entry) return null;
-    if (entry.remainingQuests) return `${entry.remainingQuests} quest(s) remaining`;
+    if (isDebuff) {
+      const entry = currentUser.activeDebuffs?.find(e => e.name === name);
+      if (!entry) return null;
+      if (entry.remainingQuests) return `${entry.remainingQuests} quest(s) remaining`;
+      if (!entry.expiresAt) return "Until condition cleared";
+      const remaining = entry.expiresAt - Date.now();
+      if (remaining <= 0) return "Expiring...";
+      const hours = Math.floor(remaining / (1000 * 60 * 60));
+      const mins = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+      return `${hours}h ${mins}m remaining`;
+    }
+    const entry = currentUser.activeBuffs?.find(e => e.name === name);
     if (!entry.expiresAt) return "Until condition cleared";
     const remaining = entry.expiresAt - Date.now();
     if (remaining <= 0) return "Expiring...";
