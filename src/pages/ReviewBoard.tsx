@@ -1,10 +1,10 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "@/context/GameContext";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Zap } from "lucide-react";
+import { CheckCircle, XCircle, Zap } from "lucide-react";
 
 const ReviewBoard = () => {
-  const { quests, users, approveQuest, currentUser } = useGame();
+  const { quests, users, approveQuest, rejectQuest, currentUser } = useGame();
 
   if (currentUser?.role !== "guild_master") {
     return <div className="p-6 text-muted-foreground">Access denied.</div>;
@@ -39,11 +39,19 @@ const ReviewBoard = () => {
                     <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground">
                       <span>Submitted by: <strong className="text-gold">{adventurer?.username || "Unknown"}</strong></span>
                       <span className="flex items-center gap-1"><Zap className="h-3 w-3 text-gold" /> {q.xpReward} XP</span>
+                      {q.wasRejected && (
+                        <span className="text-crimson font-heading">🛡️💔 Previously Rejected</span>
+                      )}
                     </div>
                   </div>
-                  <Button onClick={() => approveQuest(q.id)} className="font-heading shrink-0">
-                    <CheckCircle className="h-4 w-4 mr-1" /> Approve
-                  </Button>
+                  <div className="flex gap-2 shrink-0">
+                    <Button onClick={() => rejectQuest(q.id)} variant="outline" className="font-heading border-crimson/30 text-crimson hover:bg-crimson/10" size="sm">
+                      <XCircle className="h-4 w-4 mr-1" /> Reject
+                    </Button>
+                    <Button onClick={() => approveQuest(q.id)} className="font-heading" size="sm">
+                      <CheckCircle className="h-4 w-4 mr-1" /> Approve
+                    </Button>
+                  </div>
                 </div>
               </motion.div>
             );
