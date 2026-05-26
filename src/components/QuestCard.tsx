@@ -1,8 +1,8 @@
-import React, { forwardRef } from "react"; // Tambahkan forwardRef
+import React, { forwardRef, useState } from "react"; // Tambahkan useState
 import { motion } from "framer-motion";
 import { useGame } from "@/context/GameContext";
 import { Button } from "@/components/ui/button";
-import { Clock, Zap, CheckCircle, Send, Swords } from "lucide-react";
+import { Clock, Zap, CheckCircle, Send, Swords, ChevronDown, ChevronUp } from "lucide-react"; // Tambahkan icon chevron
 import { Quest } from "@/types/game";
 
 const diffBadge: Record<string, string> = {
@@ -12,9 +12,11 @@ const diffBadge: Record<string, string> = {
   legendary: "bg-royal-purple/20 text-royal-purple",
 };
 
-// Bungkus dengan forwardRef
 const QuestCard = forwardRef<HTMLDivElement, { quest: Quest }>(({ quest, ...props }, ref) => {
   const { currentUser, acceptQuest, submitQuest, users } = useGame();
+  
+  // --- STATE FOR EXPANDABLE DESCRIPTION ---
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const timeLeft = quest.status === "submitted" ? 0 : Math.max(0, quest.deadline - Date.now());
   const hoursLeft = Math.floor(timeLeft / (1000 * 60 * 60));
@@ -30,10 +32,13 @@ const QuestCard = forwardRef<HTMLDivElement, { quest: Quest }>(({ quest, ...prop
   const opponentId = quest.challengerId === currentUser?.id ? quest.duelOpponentId : quest.challengerId;
   const opponentName = users.find(u => u.id === opponentId)?.username || "Lawan";
 
+  // Cek apakah deskripsi cukup panjang untuk memicu tombol "More" (opsional, atau tampilkan selalu jika ingin aman)
+  const isLongDescription = quest.description.length > 80;
+
   return (
     <motion.div
       {...props}
-      ref={ref} // Tempelkan ref di sini
+      ref={ref}
       layout
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -68,7 +73,30 @@ const QuestCard = forwardRef<HTMLDivElement, { quest: Quest }>(({ quest, ...prop
         </span>
       </div>
 
-      <p className="text-sm text-muted-foreground font-body mb-4 line-clamp-2">{quest.description}</p>
+      {/* --- BOX DESKRIPSI --- */}
+      <div className="mb-4">
+        <p className={`text-sm text-muted-foreground font-body transition-all duration-300 ${isExpanded ? "" : "line-clamp-2"}`}>
+          {quest.description}
+        </p>
+        
+        {/* Tombol View More / Less hanya muncul jika deskripsi panjang */}
+        {isLongDescription && (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="text-xs text-gold/80 hover:text-gold mt-1 font-heading flex items-center gap-0.5 transition-colors focus:outline-none"
+          >
+            {isExpanded ? (
+              <>
+                Sembunyikan <ChevronUp className="h-3 w-3" />
+              </>
+            ) : (
+              <>
+                Lihat Selengkapnya <ChevronDown className="h-3 w-3" />
+              </>
+            )}
+          </button>
+        )}
+      </div>
 
       <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4 font-body">
         <span className="flex items-center gap-1">
@@ -112,7 +140,6 @@ const QuestCard = forwardRef<HTMLDivElement, { quest: Quest }>(({ quest, ...prop
   );
 });
 
-// Tambahkan displayName untuk mempermudah debugging
 QuestCard.displayName = "QuestCard";
 
 export default QuestCard;
