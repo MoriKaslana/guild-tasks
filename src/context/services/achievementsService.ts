@@ -2,10 +2,10 @@ import { User, Quest } from "@/types/game";
 
 export const achievementService = {
   checkAchievements: (
-    user: User, 
-    allQuests: Quest[], 
-    currentQuest?: Quest, 
-    chatCount?: number // Kita tambahin param opsional buat jumlah chat
+    user: User,
+    allQuests: Quest[],
+    currentQuest?: Quest,
+    chatCount?: number, // Kita tambahin param opsional buat jumlah chat
   ): string[] => {
     const newlyEarned: string[] = [];
     const currentAch = user.achievements || [];
@@ -23,8 +23,8 @@ export const achievementService = {
 
     // --- LOGIC SPESIFIK QUEST ---
     if (currentQuest) {
-      if (currentQuest.difficulty === 'legendary') addIfNew("Legendary Slayer");
-      
+      if (currentQuest.difficulty === "legendary") addIfNew("Legendary Slayer");
+
       if (currentQuest.submittedAt) {
         const hour = new Date(currentQuest.submittedAt).getHours();
         if (hour >= 0 && hour < 5) addIfNew("Night Owl");
@@ -37,13 +37,31 @@ export const achievementService = {
     }
 
     // --- LOGIC KOMPLEKS ---
-    const completed = allQuests.filter(q => q.assignedTo === user.id && q.status === 'completed');
-    const diffs = new Set(completed.map(q => q.difficulty));
-    if (diffs.has('easy') && diffs.has('medium') && diffs.has('hard') && diffs.has('legendary')) {
+    // Gabungkan quest yang sudah completed di DB + currentQuest yang baru saja di-approve
+    // (allQuests belum refresh saat checkAchievements dipanggil, jadi currentQuest perlu dimasukkan manual)
+    const completedFromDb = allQuests.filter(
+      (q) => q.assignedTo === user.id && q.status === "completed",
+    );
+    const completed = currentQuest
+      ? [
+          ...completedFromDb.filter((q) => q.id !== currentQuest.id),
+          currentQuest,
+        ]
+      : completedFromDb;
+
+    const diffs = new Set(completed.map((q) => q.difficulty));
+    if (
+      diffs.has("easy") &&
+      diffs.has("medium") &&
+      diffs.has("hard") &&
+      diffs.has("legendary")
+    ) {
       addIfNew("Jack of All Trades");
     }
 
-    const lastThree = completed.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)).slice(0, 3);
+    const lastThree = completed
+      .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))
+      .slice(0, 3);
     if (lastThree.length === 3 && user.activeDebuffs.length === 0) {
       addIfNew("Hat Trick");
       addIfNew("streak_master");
@@ -55,5 +73,5 @@ export const achievementService = {
     }
 
     return newlyEarned;
-  }
+  },
 };

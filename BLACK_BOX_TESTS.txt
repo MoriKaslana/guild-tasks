@@ -1,0 +1,65 @@
+================================================================================
+  BLACK BOX TESTING — SOVEREIGN GUILD (guild-tasks)
+  Generated for Skripsi / Thesis purposes
+  Framework: Vitest + @testing-library/react + @testing-library/jest-dom
+================================================================================
+
+FILE STRUCTURE TO CREATE:
+  src/test/helpers.ts
+  src/test/services/gamificationService.test.ts
+  src/test/services/achievementsService.test.ts
+  src/test/components/AuthScreen.test.tsx
+  src/test/components/QuestCard.test.tsx
+  src/test/components/PlayerStatusBar.test.tsx
+  src/test/components/RoleSwitcher.test.tsx
+  src/test/components/ExiledDialog.test.tsx
+  src/test/components/InviteModal.test.tsx
+  src/test/pages/Profile.test.tsx
+  src/test/pages/HallOfFame.test.tsx
+
+================================================================================
+FILE 1: src/test/helpers.ts
+================================================================================
+
+import { vi } from "vitest";
+import { User, Quest, GameState } from "@/types/game";
+
+/** Factory: membuat objek User palsu untuk keperluan testing */
+export const createMockUser = (overrides: Partial<User> = {}): User => ({
+  id: "user-1",
+  email: "test@example.com",
+  username: "TestUser",
+  role: "adventurer",
+  avatar: "⚔️",
+  xp: 0,
+  level: 1,
+  buffs: [],
+  debuffs: [],
+  activeBuffs: [],
+  activeDebuffs: [],
+  achievements: [],
+  guildId: "guild-1",
+  questsCompleted: 0,
+  joinedAt: Date.now(),
+  lastQuestCompletedAt: null,
+  consecutiveLateCount: 0,
+  debuffImmunity: false,
+  stagnantSoulCounter: 0,
+  rustyEquipment: false,
+  brokenShieldQuests: [],
+  isGuildMaster: false,
+  isAdventurer: true,
+  availableRoles: ["adventurer"],
+  ...overrides,
+});
+
+/** Factory: membuat objek Quest palsu untuk keperluan testing */
+export const createMockQuest = (overrides: Partial<Quest> = {}): Quest => ({
+  id: "quest-1",
+  title: "Test Quest",
+  description: "A short quest description",
+  difficulty: "easy",
+  xpReward: 50,
+  deadline: Date.now() + 24 * 60 * 60 * 1000,
+  createdBy: "user-gm",
+  assign

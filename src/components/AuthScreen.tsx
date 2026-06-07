@@ -17,7 +17,7 @@ const AuthScreen = () => {
   const [role, setRole] = useState<Role>("adventurer");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  
+
   // State untuk melacak hover penjelasan
   const [hoveredRole, setHoveredRole] = useState<Role | null>(null);
 
@@ -29,13 +29,16 @@ const AuthScreen = () => {
       if (!success) setError("Invalid credentials.");
     } else {
       const success = await register(email, username, password, role);
-      if (!success) setError("Registration failed or email/username already taken.");
+      if (!success)
+        setError("Registration failed or email/username already taken.");
     }
   };
 
   const roleDescriptions = {
-    adventurer: "Sosok pemberani yang menerima tugas, berpacu dengan tenggat waktu, dan mendapatkan XP. Dapat menerima tugas dan mengirimkannya untuk ditinjau.",
-    guild_master: "Pemimpin yang membuat tugas, meninjau pengajuan, menolak atau menyetujui tugas, dan mengelola guild. Dapat mengundang adventurer."
+    adventurer:
+      "Sosok pemberani yang menerima tugas, berpacu dengan tenggat waktu, dan mendapatkan XP. Dapat menerima tugas dan mengirimkannya untuk ditinjau.",
+    guild_master:
+      "Pemimpin yang membuat tugas, meninjau pengajuan, menolak atau menyetujui tugas, dan mengelola guild. Dapat mengundang adventurer.",
   };
 
   return (
@@ -63,7 +66,7 @@ const AuthScreen = () => {
               <Label className="text-foreground">Username atau Email</Label>
               <Input
                 value={username}
-                onChange={e => setUsername(e.target.value)}
+                onChange={(e) => setUsername(e.target.value)}
                 required
                 className="bg-secondary border-border"
                 placeholder="Masukkan username atau email"
@@ -76,7 +79,7 @@ const AuthScreen = () => {
                 <Input
                   type="email"
                   value={email}
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                   className="bg-secondary border-border"
                 />
@@ -85,12 +88,12 @@ const AuthScreen = () => {
                 <Label className="text-foreground">Username</Label>
                 <Input
                   value={username}
-                  onChange={e => setUsername(e.target.value)}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                   className="bg-secondary border-border"
                 />
               </div>
-              
+
               {/* BAGIAN ROLE DENGAN HOVER EXPLANATION */}
               <div>
                 <Label className="text-foreground flex items-center gap-2">
@@ -124,9 +127,9 @@ const AuthScreen = () => {
                     ⚔️ Adventurer
                   </button>
                 </div>
-                
+
                 {/* Deskripsi yang muncul saat di-hover atau dipilih */}
-                <div className="mt-2 min-h-[60px]"> 
+                <div className="mt-2 min-h-[60px]">
                   <AnimatePresence mode="wait">
                     {(hoveredRole || role) && (
                       <motion.p
@@ -137,7 +140,7 @@ const AuthScreen = () => {
                         className="text-[12px] leading-relaxed text-muted-foreground italic bg-secondary/30 p-2 rounded border border-border/50"
                       >
                         <span className="text-gold font-bold uppercase not-italic mr-1">
-                          {(hoveredRole || role).replace('_', ' ')}:
+                          {(hoveredRole || role).replace("_", " ")}:
                         </span>
                         {roleDescriptions[hoveredRole || role]}
                       </motion.p>
@@ -155,7 +158,7 @@ const AuthScreen = () => {
               <Input
                 type={showPassword ? "text" : "password"}
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
                 required
                 className="bg-secondary border-border pr-10"
               />
@@ -172,15 +175,20 @@ const AuthScreen = () => {
           {error && <p className="text-crimson text-sm">{error}</p>}
 
           <Button type="submit" className="w-full font-heading">
-            {isLogin ? "Masuk Guild" : "Tempa Takdir Anda"}
+            {isLogin ? "Masuk Guild" : "Daftar"}
           </Button>
         </form>
 
         <button
-          onClick={() => { setIsLogin(!isLogin); setError(""); }}
+          onClick={() => {
+            setIsLogin(!isLogin);
+            setError("");
+          }}
           className="mt-4 w-full text-center text-sm text-muted-foreground hover:text-gold transition-colors"
         >
-          {isLogin ? "Seorang Pengembara ? Silahkan Daftar Dulu" : "Sudah menjadi anggota? Masuk"}
+          {isLogin
+            ? "Seorang Pengembara ? Silahkan Daftar Dulu"
+            : "Sudah menjadi anggota? Masuk"}
         </button>
       </motion.div>
     </div>

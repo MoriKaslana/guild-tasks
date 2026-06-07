@@ -1,10 +1,21 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from "@supabase/supabase-js";
 
-// 1. URL Project (Tanpa /rest/v1/ di ujungnya)
-const supabaseUrl = 'https://nyqpsgwxtddikxmznvip.supabase.co' 
+export const supabase = createClient("http://localhost:3000", "dummy-key", {
+  global: {
+    // THE ULTIMATE TRICK: Kita cegat dan bersihkan URL sebelum meluncur
+    fetch: (url, options) => {
+      // 1. Kalau Supabase maksa pakai /rest/v1/, kita hapus
+      let cleanUrl = url.toString().replace("/rest/v1/", "/");
 
-// 2. Anon Key yang baru aja lu kirim
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im55cXBzZ3d4dGRkaWt4bXpudmlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc4NzUxNTAsImV4cCI6MjA5MzQ1MTE1MH0.lm-1vXKVStFNu84vduO9c_M9f5sZzucXiRReLUXGukk'
+      // 2. Kalau ada double slash (http://localhost:3000//quests), kita potong jadi satu
+      cleanUrl = cleanUrl.replace("3000//", "3000/");
 
-// 3. Inisialisasi Client standar (Trik fetch lama sudah tidak butuh lagi)
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+      // 3. Lanjutkan request dengan URL yang sudah bersih dan rapi
+      return fetch(cleanUrl, options);
+    },
+    headers: {
+      apikey: "",
+      Authorization: "",
+    },
+  },
+});
