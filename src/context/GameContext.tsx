@@ -37,6 +37,20 @@ import {
 import { userService } from "./services/userService";
 import { achievementService } from "./services/achievementsService";
 
+function generateUUID(): string {
+  if (
+    typeof crypto !== "undefined" &&
+    typeof crypto.randomUUID === "function"
+  ) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
 const GameContext = createContext<GameState | null>(null);
 
 export const useGame = () => {
@@ -423,7 +437,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         }
         const newGuildId =
           role === "guild_master" && !existingUser.guild_id
-            ? crypto.randomUUID()
+            ? generateUUID()
             : existingUser.guild_id;
         await authService.updateUser(existingUser.id, {
           role: role,
@@ -442,9 +456,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         toast.error("Username sudah diambil!");
         return false;
       }
-      const id = crypto.randomUUID();
-      const assignedGuildId =
-        role === "guild_master" ? crypto.randomUUID() : "";
+      const id = generateUUID();
+      const assignedGuildId = role === "guild_master" ? generateUUID() : "";
       const newUser: User = {
         id,
         email,
