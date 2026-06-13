@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-export const supabase = createClient("http://localhost:3000", "dummy-key", {
+export const supabase = createClient("http://103.186.1.69:3000", "dummy-key", {
   global: {
     // THE ULTIMATE TRICK: Kita cegat dan bersihkan URL sebelum meluncur
     fetch: (url, options) => {
