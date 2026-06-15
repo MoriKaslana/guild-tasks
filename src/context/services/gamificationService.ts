@@ -84,7 +84,15 @@ export const gamificationService = {
     };
   },
 
-  // 5. Menghitung XP akhir setelah modifikasi Buff & Debuff
+  // 5. Mengurangi counter quest-based debuffs (dipanggil saat quest selesai/diapprove)
+  decrementQuestCounters: (user: User): User => {
+    const activeDebuffs = user.activeDebuffs.map(d =>
+      d.remainingQuests !== undefined ? { ...d, remainingQuests: d.remainingQuests - 1 } : d
+    );
+    return { ...user, activeDebuffs };
+  },
+
+  // 6. Menghitung XP akhir setelah modifikasi Buff & Debuff
   calcXpWithModifiers: (user: User, quest: Quest) => {
     const baseXp = quest.xpReward || XP_MAP[quest.difficulty] || 0;
     const bonuses: { name: string; amount: number }[] = [];

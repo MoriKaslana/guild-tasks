@@ -776,12 +776,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       // --- LOGIC BUFF & CLEANUP (DIPERTAHANKAN) ---
-      updated = applyBuffsDebuffs(updated, quest, now, quests);
+      // Use submission timestamp for buff conditions so effects like "submitted early"
+      // or "night owl" are evaluated at the correct point in time, not approval time.
+      const evalTime = quest.submittedAt || now;
+      updated = applyBuffsDebuffs(updated, quest, evalTime, quests);
       if (updated.brokenShieldQuests) {
         updated.brokenShieldQuests = updated.brokenShieldQuests.filter(
           (id) => id !== quest.id,
         );
       }
+      // Decrement quest-counter debuffs (e.g. Stagnant Soul) now that a quest is completed.
+      updated = gamificationService.decrementQuestCounters(updated);
       updated = gamificationService.cleanExpiredEffects(updated);
 
       // --- SAVE KE DB ---

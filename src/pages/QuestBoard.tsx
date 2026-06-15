@@ -348,6 +348,30 @@ const QuestBoard = () => {
                   </div>
                   <div>
                     <Label>Batas Waktu (Deadline)</Label>
+                    <div className="flex flex-wrap gap-1 mt-1 mb-2">
+                      {[
+                        { label: "1 Hari", days: 1 },
+                        { label: "3 Hari", days: 3 },
+                        { label: "1 Minggu", days: 7 },
+                        { label: "2 Minggu", days: 14 },
+                      ].map(({ label, days }) => (
+                        <button
+                          key={label}
+                          type="button"
+                          onClick={() => {
+                            const d = new Date();
+                            d.setDate(d.getDate() + days);
+                            setDeadlineDate(d);
+                            setDeadlineHour("11");
+                            setDeadlineMinute("59");
+                            setDeadlinePeriod("PM");
+                          }}
+                          className="px-3 py-1 text-xs rounded-md border border-border bg-secondary text-muted-foreground hover:border-gold hover:text-gold transition-colors"
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
                     <div className="flex flex-wrap gap-2 mt-1">
                       <Popover>
                         <PopoverTrigger asChild>
@@ -369,7 +393,11 @@ const QuestBoard = () => {
                             mode="single"
                             selected={deadlineDate}
                             onSelect={setDeadlineDate}
-                            disabled={(date) => date < new Date()}
+                            disabled={(date) => {
+                              const today = new Date();
+                              today.setHours(0, 0, 0, 0);
+                              return date < today;
+                            }}
                             initialFocus
                           />
                         </PopoverContent>
