@@ -399,7 +399,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       const lastCompleted = allQuests
         .filter((q) => q.assignedTo === user.id && q.status === "completed")
         .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0))[0];
+      const hasAvailableQuests = allQuests.some(
+        (q) => q.guildId === user.guildId && q.status === "open",
+      );
       if (
+        hasAvailableQuests &&
         lastCompleted &&
         Date.now() - (lastCompleted.completedAt || 0) > 3 * 24 * 60 * 60 * 1000
       ) {
