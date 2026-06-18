@@ -1,12 +1,10 @@
-import { useGame } from "@/context/GameContext"; // 👈 Sesuaikan path-nya ke file GameContext lo
-import { toast } from "sonner";
+import { useGame } from "@/context/GameContext";
 
 export function RoleSwitcher() {
   const { currentUser, switchRole } = useGame();
 
   if (!currentUser) return null;
 
-  // 1. Cek apakah user punya kedua role (biar tombolnya gak mubazir)
   const canSwitch = currentUser.isGuildMaster && currentUser.isAdventurer;
 
   if (!canSwitch) {
@@ -17,7 +15,18 @@ export function RoleSwitcher() {
     );
   }
 
-  // 2. Tentukan target role berikutnya
+  if (currentUser.roleLocked) {
+    return (
+      <div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800 backdrop-blur-sm">
+        <p className="text-xs text-gray-500 mb-2">Role Aktif: <span className="text-white font-bold">{currentUser.role}</span></p>
+        <div className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gray-800 text-gray-500 rounded-lg font-semibold cursor-not-allowed select-none">
+          <span>🔒</span>
+          Role terkunci (tamu guild)
+        </div>
+      </div>
+    );
+  }
+
   const targetRole = currentUser.role === "guild_master" ? "adventurer" : "guild_master";
   const targetLabel = targetRole === "guild_master" ? "Guild Master" : "Adventurer";
   const icon = targetRole === "guild_master" ? "👑" : "⚔️";
@@ -25,7 +34,6 @@ export function RoleSwitcher() {
   return (
     <div className="p-4 bg-gray-900/50 rounded-xl border border-gray-800 backdrop-blur-sm">
       <p className="text-xs text-gray-500 mb-2">Role Aktif: <span className="text-white font-bold">{currentUser.role}</span></p>
-      
       <button
         onClick={() => switchRole(targetRole)}
         className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white rounded-lg transition-all font-semibold shadow-md"

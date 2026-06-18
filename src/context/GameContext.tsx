@@ -483,6 +483,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         isGuildMaster: role === "guild_master",
         isAdventurer: role === "adventurer",
         availableRoles: [role],
+        roleLocked: false,
       };
       await authService.insertUser({
         id: newUser.id,
@@ -557,6 +558,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           ...(data.is_guild_master ? ["guild_master"] : []),
           ...(data.is_adventurer ? ["adventurer"] : []),
         ] as Role[],
+        roleLocked: data.role_locked || false,
       };
       setCurrentUser(loggedInUser);
       toast.success(`Welcome back, ${loggedInUser.username}!`);
@@ -575,6 +577,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const switchRole = async (newRole: Role): Promise<void> => {
     if (!currentUser) return;
+    if (currentUser.roleLocked) {
+      toast.error("Role terkunci selama berada di guild orang lain.");
+      return;
+    }
     const hasAccess =
       newRole === "guild_master"
         ? currentUser.isGuildMaster
@@ -958,6 +964,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         toast.error("User tidak ditemukan.");
         return;
       }
+      if (targetUser.is_guild_master && !targetUser.is_adventurer) {
+        toast.error("Akun ini tidak memiliki akun adventurer.");
+        return;
+      }
       await inviteService.createInvite(
         currentUser.guildId || "",
         currentUser.id,
@@ -972,12 +982,24 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
   const acceptInvite = async (inviteID: string, guildId: string) => {
     if (!currentUser) return;
     try {
+      // If the accepting user is a GM with an adventurer account, force them
+      // into the adventurer role so they don't carry GM authority into the new guild.
+      const forceRole = currentUser.isGuildMaster && currentUser.isAdventurer
+        ? "adventurer"
+        : undefined;
+
       await inviteService.processAcceptInvite(
         currentUser.id,
         inviteID,
         guildId,
+        forceRole,
       );
-      const updatedUser = { ...currentUser, guildId: guildId };
+
+      const updatedUser = {
+        ...currentUser,
+        guildId,
+        ...(forceRole ? { role: forceRole as Role, roleLocked: true } : {}),
+      };
       setCurrentUser(updatedUser);
       setUsers((prev) =>
         prev.map((u) => (u.id === currentUser.id ? updatedUser : u)),

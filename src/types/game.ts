@@ -70,6 +70,7 @@ export interface User {
   isGuildMaster: boolean;
   isAdventurer: boolean;
   availableRoles: Role[];
+  roleLocked: boolean;
 }
 
 export interface Quest {

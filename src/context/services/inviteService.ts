@@ -6,7 +6,7 @@ export const inviteService = {
   async findUserByEmail(email: string) {
     const { data, error } = await supabase
       .from('users')
-      .select('id, username, guild_id')
+      .select('id, username, guild_id, is_guild_master, is_adventurer')
       .eq('email', email)
       .single();
     
@@ -29,11 +29,17 @@ export const inviteService = {
   },
 
   // Update user jadi masuk guild & update status undangan
-  async processAcceptInvite(userId: string, inviteId: string, guildId: string) {
-    // 1. Update user guild_id
+  async processAcceptInvite(userId: string, inviteId: string, guildId: string, forceRole?: string) {
+    const userPayload: Record<string, unknown> = { guild_id: guildId };
+    if (forceRole) {
+      userPayload.role = forceRole;
+      userPayload.role_locked = true;
+    }
+
+    // 1. Update user guild_id (dan role jika diperlukan)
     const userUpdate = supabase
       .from('users')
-      .update({ guild_id: guildId })
+      .update(userPayload)
       .eq('id', userId);
 
     // 2. Update status undangan
