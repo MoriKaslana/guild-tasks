@@ -368,6 +368,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
           quest.id,
           3,
         );
+        u = { ...u, consecutiveLateCount: 0 };
         if (u.debuffs.includes("Stagnant Soul"))
           toast("⛓️ Ultimate Debuff: Stagnant Soul!", {
             description: "ALL buffs blocked for next 3 quests.",
@@ -806,6 +807,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
       }
       // Decrement quest-counter debuffs (e.g. Stagnant Soul) now that a quest is completed.
       updated = gamificationService.decrementQuestCounters(updated);
+      // Rusty Equipment clears after completing 1 quest.
+      updated = {
+        ...updated,
+        activeDebuffs: updated.activeDebuffs.filter(d => d.name !== "Rusty Equipment"),
+        rustyEquipment: false,
+      };
       updated = gamificationService.cleanExpiredEffects(updated);
 
       // --- SAVE KE DB ---

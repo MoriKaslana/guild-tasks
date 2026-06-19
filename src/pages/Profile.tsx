@@ -101,7 +101,7 @@ const Profile = () => {
 
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="scroll-card rounded-lg p-6 mb-6">
         <div className="flex items-center gap-4 mb-6">
-          <span className="text-5xl">{currentUser.avatar}</span>
+          <span className={`text-5xl ${currentUser.rustyEquipment ? "grayscale" : ""}`}>{currentUser.avatar}</span>
           <div>
             <h2 className="font-heading text-xl text-foreground">{currentUser.username}</h2>
             <p className="text-sm text-gold font-heading capitalize">

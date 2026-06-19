@@ -139,7 +139,7 @@ const AppSidebar = () => {
             <div
               className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ${collapsed ? "w-0 opacity-0" : "w-full opacity-100"}`}
             >
-              <span className="text-2xl shrink-0">{currentUser.avatar}</span>
+              <span className={`text-2xl shrink-0 ${currentUser.rustyEquipment ? "grayscale" : ""}`}>{currentUser.avatar}</span>
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-heading text-gold truncate">
                   {currentUser.username}
