@@ -579,6 +579,15 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     toast.success("Logged out!");
   };
 
+  const deleteAccount = async () => {
+    if (!currentUser) return;
+    await userService.deleteUserById(currentUser.id);
+    setCurrentUser(null);
+    setUsers((prev) => prev.filter((u) => u.id !== currentUser.id));
+    localStorage.removeItem("game_user");
+    toast.success("Akun berhasil dihapus.");
+  };
+
   const switchRole = async (newRole: Role): Promise<void> => {
     if (!currentUser) return;
     if (currentUser.roleLocked) {
@@ -1078,6 +1087,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         register,
         logout,
+        deleteAccount,
         createQuest,
         acceptQuest,
         submitQuest,

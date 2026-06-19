@@ -136,6 +136,7 @@ export interface GameState {
   sendMessage: (content: string) => Promise<void>;
   sendInvite: (email: string) => Promise<void>;
   acceptInvite: (inviteId: string, guildId: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   changeAvatar: (avatar: string) => void;
   switchRole: (newRole: Role) => Promise<void>;
   kickMember: (memberId: string) => Promise<void>;

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGame } from "@/context/GameContext";
-import { Trophy, Star, ShieldAlert, Swords } from "lucide-react"; 
+import { Trophy, Star, ShieldAlert, Swords } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ExileDialog from "@/components/ExiledDialog"; 
+import ExileDialog from "@/components/ExiledDialog";
 import { User } from "@/types/game";
 import { toast } from "sonner";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
+import { shouldShowTutorial, markTutorialSeen } from "@/lib/utils";
 
 const HallOfFame = () => {
   const { users, achievements, currentUser, kickMember, quests, sendDuelChallenge } = useGame();
@@ -20,11 +21,8 @@ const HallOfFame = () => {
   const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
-    if (currentUser?.guildId) {
-      const hasSeen = localStorage.getItem(`hof_tutorial_done_${currentUser.id}`);
-      if (!hasSeen) {
-        setShowTutorial(true);
-      }
+    if (currentUser?.guildId && shouldShowTutorial(`hof_tutorial_done_${currentUser.id}`)) {
+      setShowTutorial(true);
     }
   }, [currentUser]);
 
@@ -42,7 +40,7 @@ const HallOfFame = () => {
 
   const finishTutorial = () => {
     setShowTutorial(false);
-    localStorage.setItem(`hof_tutorial_done_${currentUser?.id}`, "true");
+    markTutorialSeen(`hof_tutorial_done_${currentUser?.id}`);
   };
 
   // FILTER LOGIC: 

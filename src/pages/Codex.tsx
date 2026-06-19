@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TutorialOverlay } from "@/components/TutorialOverlay"; 
+import { TutorialOverlay } from "@/components/TutorialOverlay";
 import { useGame } from "@/context/GameContext";
+import { shouldShowTutorial, markTutorialSeen } from "@/lib/utils";
 
 // --- DATA (Tetap Sama, Tidak Ada Yang Dihapus) ---
 const BUFFS = [
@@ -53,17 +54,14 @@ const Codex = () => {
   const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
-    if (currentUser) {
-      const hasSeen = localStorage.getItem(`codex_tutorial_done_${currentUser.id}`);
-      if (!hasSeen) {
-        setShowTutorial(true);
-      }
+    if (currentUser && shouldShowTutorial(`codex_tutorial_done_${currentUser.id}`)) {
+      setShowTutorial(true);
     }
   }, [currentUser]);
 
   const finishTutorial = () => {
     setShowTutorial(false);
-    localStorage.setItem(`codex_tutorial_done_${currentUser?.id}`, "true");
+    markTutorialSeen(`codex_tutorial_done_${currentUser?.id}`);
   };
 
   return (

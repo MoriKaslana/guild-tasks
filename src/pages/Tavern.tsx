@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Lock } from "lucide-react";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
+import { shouldShowTutorial, markTutorialSeen } from "@/lib/utils";
 
 const Tavern = () => {
   const { chatMessages, sendMessage, currentUser } = useGame();
@@ -15,17 +16,14 @@ const Tavern = () => {
   const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
-    if (currentUser?.guildId) {
-      const hasSeen = localStorage.getItem(`tavern_tutorial_done_${currentUser.id}`);
-      if (!hasSeen) {
-        setShowTutorial(true);
-      }
+    if (currentUser?.guildId && shouldShowTutorial(`tavern_tutorial_done_${currentUser.id}`)) {
+      setShowTutorial(true);
     }
   }, [currentUser]);
 
   const finishTutorial = () => {
     setShowTutorial(false);
-    localStorage.setItem(`tavern_tutorial_done_${currentUser?.id}`, "true");
+    markTutorialSeen(`tavern_tutorial_done_${currentUser?.id}`);
   };
 
   // Auto scroll ke pesan terbaru

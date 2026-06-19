@@ -3,25 +3,40 @@ import { motion } from "framer-motion";
 import { useGame } from "@/context/GameContext";
 import { Shield, Zap, Trophy, Flame } from "lucide-react";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
+import { toast } from "sonner";
+import { shouldShowTutorial, markTutorialSeen } from "@/lib/utils";
 
 const Profile = () => {
-  const { currentUser, changeAvatar, availableAvatars, quests } = useGame();
-  
+  const { currentUser, changeAvatar, availableAvatars, quests, deleteAccount } = useGame();
+
   // --- STATE TUTORIAL ---
   const [tutorialStep, setTutorialStep] = useState(0);
   const [showTutorial, setShowTutorial] = useState(false);
 
+  // --- STATE DELETE ---
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== "Hapus Akun Ini") return;
+    setIsDeleting(true);
+    try {
+      await deleteAccount();
+    } catch {
+      toast.error("Gagal menghapus akun.");
+      setIsDeleting(false);
+    }
+  };
+
   useEffect(() => {
-    if (currentUser) {
-      const hasSeen = localStorage.getItem(`profile_tutorial_done_${currentUser.id}`);
-      if (!hasSeen) {
-        setShowTutorial(true);
-      }
+    if (currentUser && shouldShowTutorial(`profile_tutorial_done_${currentUser.id}`)) {
+      setShowTutorial(true);
     }
   }, [currentUser]);
 
   const nextStep = () => {
-    if (tutorialStep < 2) {
+    if (tutorialStep < 3) {
       setTutorialStep(s => s + 1);
     } else {
       finishTutorial();
@@ -34,7 +49,7 @@ const Profile = () => {
 
   const finishTutorial = () => {
     setShowTutorial(false);
-    localStorage.setItem(`profile_tutorial_done_${currentUser?.id}`, "true");
+    markTutorialSeen(`profile_tutorial_done_${currentUser?.id}`);
   };
 
   if (!currentUser) return null;
@@ -60,6 +75,11 @@ const Profile = () => {
       targetId: "profile-avatar-picker",
       title: "Identitas Visual",
       text: "Bosan dengan tampilan lama? Pilih Avatar baru yang sesuai dengan kepribadian pahlawanmu di sini."
+    },
+    {
+      targetId: "profile-danger-zone",
+      title: "Zona Berbahaya",
+      text: "Di sini kamu bisa menghapus akunmu secara permanen. Semua data termasuk Quest, pesan, dan progresmu akan ikut terhapus. Tindakan ini tidak bisa dibatalkan!"
     }
   ];
 
@@ -163,6 +183,57 @@ const Profile = () => {
           ))}
         </div>
       </div>
+
+      {/* Danger Zone */}
+      <div className="scroll-card rounded-lg p-6 mt-6 border border-crimson/30" id="profile-danger-zone">
+        <h3 className="font-heading text-lg text-crimson mb-1">Zona Berbahaya</h3>
+        <p className="text-xs text-muted-foreground mb-4">Aksi ini tidak dapat dibatalkan. Seluruh data akunmu akan dihapus permanen.</p>
+        <button
+          onClick={() => { setShowDeleteModal(true); setDeleteConfirmText(""); }}
+          className="px-4 py-2 rounded-lg bg-crimson/20 border border-crimson text-crimson font-heading text-sm hover:bg-crimson/40 transition-colors"
+        >
+          Hapus Akun
+        </button>
+      </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="scroll-card rounded-lg p-6 max-w-sm w-full mx-4 border border-crimson/40"
+          >
+            <h2 className="font-heading text-xl text-crimson mb-2">Hapus Akun</h2>
+            <p className="text-sm text-muted-foreground mb-4">
+              Ketik <span className="font-bold text-foreground">Hapus Akun Ini</span> untuk mengkonfirmasi penghapusan akun permanenmu.
+            </p>
+            <input
+              type="text"
+              value={deleteConfirmText}
+              onChange={e => setDeleteConfirmText(e.target.value)}
+              placeholder="Hapus Akun Ini"
+              className="w-full px-3 py-2 rounded-lg bg-background border border-white/10 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-crimson/60 mb-4"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                className="px-4 py-2 rounded-lg bg-secondary text-sm font-heading text-muted-foreground hover:bg-secondary/80 transition-colors"
+                disabled={isDeleting}
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteConfirmText !== "Hapus Akun Ini" || isDeleting}
+                className="px-4 py-2 rounded-lg bg-crimson text-sm font-heading text-white hover:bg-crimson/80 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {isDeleting ? "Menghapus..." : "Hapus Permanen"}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };

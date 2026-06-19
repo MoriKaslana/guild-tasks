@@ -72,4 +72,19 @@ export const userService = {
 
     if (error) throw error;
   },
+
+  async deleteUserById(userId: string): Promise<void> {
+    await Promise.all([
+      supabase.from("quests").update({ assigned_to: null, status: "open", accepted_at: null, submitted_at: null }).eq("assigned_to", userId),
+      supabase.from("invitations").delete().eq("inviter_id", userId),
+      supabase.from("chat_messages").delete().eq("user_id", userId),
+    ]);
+
+    const { error } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", userId);
+
+    if (error) throw error;
+  },
 };

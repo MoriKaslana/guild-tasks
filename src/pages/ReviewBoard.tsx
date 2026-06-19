@@ -11,6 +11,7 @@ import {
   FileText,
 } from "lucide-react";
 import { TutorialOverlay } from "@/components/TutorialOverlay";
+import { shouldShowTutorial, markTutorialSeen } from "@/lib/utils";
 // Import komponen Dialog UI untuk modal konfirmasi
 import {
   Dialog,
@@ -36,19 +37,14 @@ const ReviewBoard = () => {
   });
 
   useEffect(() => {
-    if (currentUser?.role === "guild_master") {
-      const hasSeen = localStorage.getItem(
-        `gm_review_tutorial_done_${currentUser.id}`,
-      );
-      if (!hasSeen) {
-        setShowTutorial(true);
-      }
+    if (currentUser?.role === "guild_master" && shouldShowTutorial(`gm_review_tutorial_done_${currentUser.id}`)) {
+      setShowTutorial(true);
     }
   }, [currentUser]);
 
   const finishTutorial = () => {
     setShowTutorial(false);
-    localStorage.setItem(`gm_review_tutorial_done_${currentUser?.id}`, "true");
+    markTutorialSeen(`gm_review_tutorial_done_${currentUser?.id}`);
   };
 
   if (currentUser?.role !== "guild_master") {

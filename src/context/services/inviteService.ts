@@ -33,7 +33,6 @@ export const inviteService = {
     const userPayload: Record<string, unknown> = { guild_id: guildId };
     if (forceRole) {
       userPayload.role = forceRole;
-      userPayload.role_locked = true;
     }
 
     // 1. Update user guild_id (dan role jika diperlukan)
