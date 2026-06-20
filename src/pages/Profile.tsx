@@ -54,6 +54,10 @@ const Profile = () => {
 
   if (!currentUser) return null;
 
+  const hasStagnantSoul = currentUser.debuffs.includes("Stagnant Soul");
+  const hasRustyEquipment = currentUser.rustyEquipment || currentUser.debuffs.includes("Rusty Equipment");
+  const buffsBlocked = hasStagnantSoul || hasRustyEquipment;
+
   const myQuests = quests.filter(q => q.assignedTo === currentUser.id);
   const completed = myQuests.filter(q => q.status === "completed").length;
   const active = myQuests.filter(q => q.status === "accepted").length;
@@ -139,10 +143,33 @@ const Profile = () => {
             <>
               {currentUser.buffs.length > 0 && (
                 <div className="mb-4">
-                  <h3 className="font-heading text-sm text-emerald-glow mb-2">✨ Active Buffs</h3>
+                  <h3 className={`font-heading text-sm mb-2 flex items-center gap-1.5 ${buffsBlocked ? "text-muted-foreground" : "text-emerald-glow"}`}>
+                    {buffsBlocked ? (hasStagnantSoul ? "⛓️" : "🔩") : "✨"} Active Buffs
+                    {buffsBlocked && (
+                      <span className="text-[10px] text-crimson font-body normal-case">
+                        {hasStagnantSoul
+                          ? `(chained · ${currentUser.stagnantSoulCounter} quest(s) remaining)`
+                          : "(rusted · complete 1 quest to restore)"}
+                      </span>
+                    )}
+                  </h3>
                   <div className="flex flex-wrap gap-2">
                     {currentUser.buffs.map(b => (
-                      <span key={b} className="text-xs px-2 py-1 rounded-full bg-emerald/20 text-emerald-glow font-heading border border-emerald-glow/20">{b}</span>
+                      <span key={b} className={`relative text-xs px-2 py-1 rounded-full font-heading border transition-all
+                        ${hasStagnantSoul
+                          ? "grayscale opacity-60 bg-slate-500/10 text-slate-400 border-slate-500/20"
+                          : hasRustyEquipment
+                          ? "[filter:sepia(0.9)_saturate(2)_brightness(0.75)] opacity-70 bg-emerald/20 text-emerald-glow border-emerald-glow/20"
+                          : "bg-emerald/20 text-emerald-glow border-emerald-glow/20"}
+                      `}>
+                        {b}
+                        {hasStagnantSoul && (
+                          <span className="absolute -top-2 -right-1 text-[9px] leading-none pointer-events-none">⛓️</span>
+                        )}
+                        {hasRustyEquipment && !hasStagnantSoul && (
+                          <span className="absolute -top-2 -right-1 text-[9px] leading-none pointer-events-none">🔩</span>
+                        )}
+                      </span>
                     ))}
                   </div>
                 </div>

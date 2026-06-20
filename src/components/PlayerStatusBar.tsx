@@ -37,6 +37,8 @@ const PlayerStatusBar = () => {
   const allBuffs = Array.isArray(currentUser.buffs) ? currentUser.buffs : [];
   const allDebuffs = Array.isArray(currentUser.debuffs) ? currentUser.debuffs : [];
   const hasStagnantSoul = allDebuffs.includes("Stagnant Soul");
+  const hasRustyEquipment = currentUser.rustyEquipment || allDebuffs.includes("Rusty Equipment");
+  const buffsBlocked = hasStagnantSoul || hasRustyEquipment;
 
   const getTimeRemaining = (name: string, isDebuff: boolean) => {
     if (isDebuff) {
@@ -79,18 +81,42 @@ const PlayerStatusBar = () => {
             return (
               <HoverCard key={buff} openDelay={200} closeDelay={100}>
                 <HoverCardTrigger asChild>
-                  <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-heading cursor-default ${info.color}`}>
+                  <span className={`relative inline-flex items-center gap-1 px-1.5 py-0.5 rounded border text-[10px] font-heading cursor-default transition-all
+                    ${hasStagnantSoul
+                      ? "grayscale opacity-60 !text-slate-400 !bg-slate-500/10 !border-slate-500/20"
+                      : hasRustyEquipment
+                      ? "[filter:sepia(0.9)_saturate(2)_brightness(0.75)] opacity-70"
+                      : info.color}
+                  `}>
                     {info.icon}
                     <span className="hidden lg:inline">{buff}</span>
+                    {hasStagnantSoul && (
+                      <span className="absolute -top-2 -right-2 text-[10px] leading-none pointer-events-none drop-shadow-sm">⛓️</span>
+                    )}
+                    {hasRustyEquipment && !hasStagnantSoul && (
+                      <span className="absolute -top-2 -right-2 text-[10px] leading-none pointer-events-none drop-shadow-sm">🔩</span>
+                    )}
                   </span>
                 </HoverCardTrigger>
                 <HoverCardContent side="bottom" className="w-64 bg-card border-border p-3">
                   <div className="space-y-1.5">
-                    <p className="font-heading text-sm text-gold flex items-center gap-1.5">{info.icon} {buff}</p>
+                    <p className={`font-heading text-sm flex items-center gap-1.5 ${buffsBlocked ? "text-muted-foreground" : "text-gold"}`}>{info.icon} {buff}</p>
                     <p className="text-xs text-muted-foreground font-body">{info.desc}</p>
-                    <div className="flex items-center gap-1.5 bg-emerald/10 rounded px-2 py-1 border border-emerald/20">
-                      <span className="text-[10px] font-heading text-emerald-glow">EFFECT:</span>
-                      <span className="text-xs text-foreground font-body">{info.effect}</span>
+                    {buffsBlocked && (
+                      <div className="flex items-center gap-1.5 bg-crimson/10 rounded px-2 py-1 border border-crimson/20">
+                        <span className="text-[10px] font-heading text-crimson">
+                          {hasStagnantSoul ? "⛓️ CHAINED" : "🔩 RUSTED"}
+                        </span>
+                        <span className="text-xs text-crimson font-body">
+                          {hasStagnantSoul
+                            ? `Blocked for ${currentUser.stagnantSoulCounter} quest(s)`
+                            : "Blocked until 1 quest completed"}
+                        </span>
+                      </div>
+                    )}
+                    <div className={`flex items-center gap-1.5 rounded px-2 py-1 border ${buffsBlocked ? "bg-muted/10 border-muted/20 opacity-50" : "bg-emerald/10 border-emerald/20"}`}>
+                      <span className={`text-[10px] font-heading ${buffsBlocked ? "text-muted-foreground" : "text-emerald-glow"}`}>EFFECT:</span>
+                      <span className={`text-xs font-body ${buffsBlocked ? "text-muted-foreground line-through" : "text-foreground"}`}>{info.effect}</span>
                     </div>
                     <div className="flex items-center gap-1.5 bg-gold/10 rounded px-2 py-1 border border-gold/20">
                       <span className="text-[10px] font-heading text-gold">⏱️</span>

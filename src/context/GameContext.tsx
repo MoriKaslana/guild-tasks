@@ -5,6 +5,7 @@ import React, {
   useCallback,
   useEffect,
 } from "react";
+
 import { supabase } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 import { authService } from "./services/authService";
@@ -14,6 +15,7 @@ import { questActionService } from "./services/questActionService";
 import { chatService } from "./services/chatService";
 import { inviteService } from "./services/inviteService";
 import {
+
   User,
   Quest,
   ChatMessage,
@@ -24,6 +26,7 @@ import {
   MasterBuff,
   MasterDebuff,
   GameState,
+  
 } from "@/types/game";
 import { masterService } from "./services/masterService";
 import {
@@ -804,6 +807,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         updated.brokenShieldQuests = updated.brokenShieldQuests.filter(
           (id) => id !== quest.id,
         );
+        updated = {
+          ...updated,
+          activeDebuffs: updated.activeDebuffs.filter(
+            (d) => !(d.name === "Broken Shield" && d.questId === quest.id),
+          ),
+        };
       }
       // Decrement quest-counter debuffs (e.g. Stagnant Soul) now that a quest is completed.
       updated = gamificationService.decrementQuestCounters(updated);
