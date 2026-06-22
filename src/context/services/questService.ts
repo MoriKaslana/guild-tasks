@@ -21,7 +21,7 @@ export const questService = {
     if (!data) return [];
 
     return data.map((q) => ({
-      id: q.id,
+      id: q.id, 
       title: q.title,
       description: q.description,
       difficulty: q.difficulty as QuestDifficulty,
@@ -62,7 +62,28 @@ export const questService = {
     if (error) throw error;
   },
 
-  // 4. Mengirim quest (Submit)
+  // 4. Update quest (GM edit)
+  async updateQuest(questId: string, data: { title: string; description: string; difficulty: string; xp_reward: number; deadline: number }) {
+    const { error } = await supabase
+      .from("quests")
+      .update({
+        title: data.title,
+        description: data.description,
+        difficulty: data.difficulty,
+        xp_reward: data.xp_reward,
+        deadline: data.deadline,
+      })
+      .eq("id", questId);
+    if (error) throw error;
+  },
+
+  // 5. Delete quest (GM)
+  async deleteQuest(questId: string) {
+    const { error } = await supabase.from("quests").delete().eq("id", questId);
+    if (error) throw error;
+  },
+
+  // 6. Mengirim quest (Submit)
   // UPDATE: Ditambah parameter submittedAt agar sinkron dengan GameContext
   async submitQuest(
     questId: string,

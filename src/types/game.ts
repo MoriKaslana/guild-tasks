@@ -129,6 +129,8 @@ export interface GameState {
     difficulty: QuestDifficulty,
     deadlineTimestamp: number,
   ) => Promise<void>;
+  updateQuest: (questId: string, title: string, description: string, difficulty: QuestDifficulty, deadlineTimestamp: number) => Promise<void>;
+  deleteQuest: (questId: string) => Promise<void>;
   acceptQuest: (questId: string) => Promise<void>;
   submitQuest: (questId: string, file?: File | null) => Promise<void>;
   approveQuest: (questId: string) => Promise<void>;

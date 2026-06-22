@@ -120,9 +120,12 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
               !prev ||
               prev.xp !== myUpdatedData.xp ||
               prev.level !== myUpdatedData.level ||
-              prev.achievements?.length !==
-                myUpdatedData.achievements?.length ||
-              prev.guildId !== myUpdatedData.guildId;
+              prev.achievements?.length !== myUpdatedData.achievements?.length ||
+              prev.guildId !== myUpdatedData.guildId ||
+              prev.activeDebuffs?.length !== myUpdatedData.activeDebuffs?.length ||
+              prev.activeBuffs?.length !== myUpdatedData.activeBuffs?.length ||
+              prev.debuffImmunity !== myUpdatedData.debuffImmunity ||
+              prev.brokenShieldQuests?.length !== myUpdatedData.brokenShieldQuests?.length;
             if (hasChanged) {
               localStorage.setItem("game_user", JSON.stringify(myUpdatedData));
               return myUpdatedData;
@@ -648,6 +651,32 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const updateQuest = async (
+    questId: string,
+    title: string,
+    description: string,
+    difficulty: QuestDifficulty,
+    deadlineTimestamp: number,
+  ) => {
+    try {
+      await questService.updateQuest(questId, { title, description, difficulty, xp_reward: XP_MAP[difficulty], deadline: deadlineTimestamp });
+      fetchQuests();
+      toast.success("Quest diperbarui!");
+    } catch {
+      toast.error("Gagal memperbarui quest.");
+    }
+  };
+
+  const deleteQuest = async (questId: string) => {
+    try {
+      await questService.deleteQuest(questId);
+      fetchQuests();
+      toast.success("Quest dihapus.");
+    } catch {
+      toast.error("Gagal menghapus quest.");
+    }
+  };
+
   const acceptQuest = async (questId: string): Promise<void> => {
     if (!currentUser) return;
     try {
@@ -857,7 +886,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         await updateUserInDb(updated);
         toast.error("Quest Ditolak & Debuff diberikan.");
       }
-      fetchQuests();
+      await Promise.all([fetchQuests(), fetchUsers()]);
     } catch (err) {
       toast.error("Gagal menolak.");
     }
@@ -1105,6 +1134,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({
         logout,
         deleteAccount,
         createQuest,
+        updateQuest,
+        deleteQuest,
         acceptQuest,
         submitQuest,
         approveQuest,

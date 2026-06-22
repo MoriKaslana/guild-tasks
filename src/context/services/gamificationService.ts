@@ -38,12 +38,25 @@ export const gamificationService = {
       return true;
     });
 
+    // When a Broken Shield debuff expires by time, also remove that quest from
+    // brokenShieldQuests so the -25% XP penalty doesn't persist past 48h.
+    const activeBrokenShieldQuestIds = new Set(
+      activeDebuffs.filter(d => d.name === "Broken Shield").map(d => d.questId)
+    );
+    const brokenShieldQuests = (user.brokenShieldQuests || []).filter(
+      id => activeBrokenShieldQuestIds.has(id)
+    );
+
+    const auraStillActive = activeBuffs.some(b => b.name === "Aura of Purity");
+
     return {
       ...user,
       buffs: activeBuffs.map(b => b.name),
       debuffs: activeDebuffs.map(d => d.name),
       activeBuffs,
       activeDebuffs,
+      brokenShieldQuests,
+      debuffImmunity: user.debuffImmunity && auraStillActive,
       rustyEquipment: activeDebuffs.some(d => d.name === "Rusty Equipment"),
       stagnantSoulCounter: activeDebuffs.find(d => d.name === "Stagnant Soul")?.remainingQuests || 0,
     };
@@ -66,10 +79,16 @@ export const gamificationService = {
   // 4. Menambahkan Debuff ke User (dengan cek Immunity)
   addDebuff: (user: User, name: string, durationMs: number | null, questId?: string, remainingQuests?: number): User => {
     if (user.debuffImmunity) {
-      toast.info("🛡️ Aura of Purity blocked a debuff!", { 
-        description: `${name} was prevented by your golden shield.` 
+      toast.info("🛡️ Aura of Purity blocked a debuff!", {
+        description: `${name} was prevented by your golden shield.`
       });
-      return { ...user, debuffImmunity: false };
+      const activeBuffs = user.activeBuffs.filter(b => b.name !== "Aura of Purity");
+      return {
+        ...user,
+        debuffImmunity: false,
+        activeBuffs,
+        buffs: activeBuffs.map(b => b.name),
+      };
     }
     
     if (user.activeDebuffs.find(d => d.name === name)) return user;

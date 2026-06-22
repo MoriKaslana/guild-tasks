@@ -363,7 +363,7 @@ const QuestBoard = () => {
                             d.setDate(d.getDate() + days);
                             setDeadlineDate(d);
                             setDeadlineHour("11");
-                            setDeadlineMinute("59");
+                            setDeadlineMinute("45");
                             setDeadlinePeriod("PM");
                           }}
                           className="px-3 py-1 text-xs rounded-md border border-border bg-secondary text-muted-foreground hover:border-gold hover:text-gold transition-colors"
