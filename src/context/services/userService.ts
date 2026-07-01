@@ -39,8 +39,8 @@ export const userService = {
       isGuildMaster: u.is_guild_master || u.isguildmaster || false,
       isAdventurer: u.is_adventurer || u.isadventurer || false,
       availableRoles: [
-        ...(u.is_guild_master || u.isguildmaster ? ["guild_master"] : []),
-        ...(u.is_adventurer || u.isadventurer ? ["adventurer"] : []),
+        ...(u.is_guild_masters || u.isguildmasters ? ["guild_master"] : []),
+        ...(u.is_adventurers || u.isadventurers ? ["adventurer"] : []),
       ] as Role[],
       roleLocked: u.role_locked || u.rolelocked || false,
     }));
